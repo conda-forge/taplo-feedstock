@@ -5,7 +5,7 @@ package:
   version: {{ version }}
 
 source:
-  url: https://github.com/tamasfe/taplo/archive/refs/tags/{{ version }}.tar.gz
+  url: https://github.com/tamasfe/taplo/archive/refs/tags/release-taplo-{{ version }}.tar.gz
   sha256: b63ea85fea3f3c7982b9a75a26627c62773623dd6ba681d717891fd9257a6629
 
 build:
