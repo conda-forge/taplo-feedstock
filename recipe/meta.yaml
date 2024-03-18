@@ -1,12 +1,12 @@
-{% set version = "0.8.1" %}
+{% set version = "0.9.1" %}
 
 package:
   name: taplo
   version: {{ version }}
 
 source:
-  url: https://github.com/tamasfe/taplo/archive/refs/tags/{{ version }}.tar.gz
-  sha256: ec8dfdcfa33a6855803286413c0603140b21c06bc659ceab7e2ddc05baf1a8b3
+  url: https://github.com/tamasfe/taplo/archive/refs/tags/release-taplo-cli-{{ version }}.tar.gz
+  sha256: 6b00333260bd593f7eb2046c9d5f0fac48b5e673e9b064b23eccf240a86b33f7
 
 build:
   number: 0
@@ -14,12 +14,13 @@ build:
 requirements:
   build:
     - {{ compiler('rust') }}
-    - {{ compiler('c') }}  # [unix]
+    - {{ compiler('c') }}        # [unix]
     - {{ compiler('m2w64_c') }}  # [win]
     - cargo-bundle-licenses
   host:
     - clangdev  # [not osx]
-    - llvmdev  # [not osx]
+    - llvmdev   # [not osx]
+    - openssl   # [unix]
 
 test:
   requires:

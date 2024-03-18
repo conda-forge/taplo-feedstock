@@ -16,5 +16,6 @@ cargo-bundle-licenses ^
     --output "%SRC_DIR%\THIRDPARTY.yml" ^
     || exit 1
 
-:: remove extra build file
+:: remove extra build files
 del /F /Q "%PREFIX%\.crates.toml"
+del /F /Q "%PREFIX%\.crates2.json"
