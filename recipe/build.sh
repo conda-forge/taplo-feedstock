@@ -17,5 +17,5 @@ cargo-bundle-licenses \
     --format yaml \
     --output "${SRC_DIR}/THIRDPARTY.yml"
 
-# remove extra build file
+# remove extra build files
 rm -f "${PREFIX}/.crates2.json" "${PREFIX}/.crates.toml"
