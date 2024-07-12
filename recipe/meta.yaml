@@ -17,7 +17,7 @@ requirements:
     - {{ compiler('c') }}        # [unix]
     - {{ stdlib('c') }}          # [unix]
     - {{ compiler('m2w64_c') }}  # [win]
-    - {{ stdlib('m2w64_c') }}    # [unix]
+    - {{ stdlib('m2w64_c') }}    # [win]
     - cargo-bundle-licenses
   host:
     - clangdev  # [not osx]
