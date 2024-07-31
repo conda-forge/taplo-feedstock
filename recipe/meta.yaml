@@ -1,4 +1,4 @@
-{% set version = "0.9.2" %}
+{% set version = "0.9.3" %}
 
 package:
   name: taplo
@@ -6,7 +6,7 @@ package:
 
 source:
   url: https://github.com/tamasfe/taplo/archive/refs/tags/release-taplo-cli-{{ version }}.tar.gz
-  sha256: 86884b6a2d505d6280ae1304e2bdc434e3b572d05d833833f7189331124f81ae
+  sha256: 5744a06a1e93128f5cb5409d5bf5e553915703ec0491df9f4c7ab31dbe430287
 
 build:
   number: 0
