@@ -17,6 +17,7 @@ requirements:
     - {{ compiler('c') }}
     - {{ stdlib('c') }}
     - cargo-bundle-licenses
+    - binutils  # [win]
   host:
     - clangdev  # [not osx]
     - llvmdev   # [not osx]
