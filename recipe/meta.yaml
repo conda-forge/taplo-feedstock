@@ -9,15 +9,13 @@ source:
   sha256: 5744a06a1e93128f5cb5409d5bf5e553915703ec0491df9f4c7ab31dbe430287
 
 build:
-  number: 0
+  number: 1
 
 requirements:
   build:
     - {{ compiler('rust') }}
-    - {{ compiler('c') }}        # [unix]
-    - {{ stdlib('c') }}          # [unix]
-    - {{ compiler('m2w64_c') }}  # [win]
-    - {{ stdlib('m2w64_c') }}    # [win]
+    - {{ compiler('c') }}
+    - {{ stdlib('c') }}
     - cargo-bundle-licenses
   host:
     - clangdev  # [not osx]
