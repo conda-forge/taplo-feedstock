@@ -1,10 +1,13 @@
 @echo on
 
+set CARGO_PROFILE_RELEASE_STRIP=symbols
+
 :: build
 cargo install --locked ^
     --root "%PREFIX%" ^
     --path crates/taplo-cli ^
     --features lsp,rustls-tls ^
+    --no-track ^
     || exit 1
 
 :: strip debug symbols
@@ -15,7 +18,3 @@ cargo-bundle-licenses ^
     --format yaml ^
     --output "%SRC_DIR%\THIRDPARTY.yml" ^
     || exit 1
-
-:: remove extra build files
-del /F /Q "%PREFIX%\.crates.toml"
-del /F /Q "%PREFIX%\.crates2.json"
