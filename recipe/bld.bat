@@ -10,9 +10,6 @@ cargo install --locked ^
     --no-track ^
     || exit 1
 
-:: strip debug symbols
-strip "%PREFIX%\bin\taplo.exe" || exit 1
-
 :: dump licenses
 cargo-bundle-licenses ^
     --format yaml ^
