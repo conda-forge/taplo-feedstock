@@ -40,7 +40,7 @@ tests:
     script:
       - taplo --version
       - taplo --help
-      - taplo --version | grep -iE "taplo ${{ version | replace(\".\", \"\\.\") }}"
+      - taplo --version | grep -iE "taplo ${{ version | replace(".", "\\.") }}"
 
 about:
   license: MIT
