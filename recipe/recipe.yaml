@@ -10,7 +10,7 @@ package:
 
 source:
   url: https://github.com/tamasfe/taplo/archive/refs/tags/release-taplo-cli-${{ version }}.tar.gz
-  sha256: c2f7b3234fc62000689a476b462784db4d1bb2be6edcc186654b211f691efaf8
+  sha256: eaec8435bfb5ccd89f7b4dd09385b6be25c2ff00aa25417cb82c88a59d4ccde0
 
 build:
   number: 0
