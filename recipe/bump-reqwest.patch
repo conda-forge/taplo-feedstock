@@ -1,3 +1,20 @@
+From 00f4e92e8e5fb4f9006825b434607e6666357482 Mon Sep 17 00:00:00 2001
+From: Oliver Borchert <oliver.borchert@quantco.com>
+Date: Wed, 18 Feb 2026 00:17:20 +0100
+Subject: [PATCH] fix: bump reqwest from 0.11 to 0.12 to fix macOS panic
+
+reqwest 0.11 depends on system-configuration 0.5.1 which panics when
+SCDynamicStoreCreate returns NULL (e.g. in sandboxed environments).
+reqwest 0.12 drops this dependency entirely when built without the
+macos-system-configuration feature (which is the case here since
+default-features = false).
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
+ Cargo.lock | 486 +++++++++++++++++++++++++++++++++++++----------------
+ Cargo.toml |   2 +-
+ 2 files changed, 340 insertions(+), 148 deletions(-)
+
 diff --git a/Cargo.lock b/Cargo.lock
 index b6545349c..b4ab8a877 100644
 --- a/Cargo.lock
@@ -9,7 +26,7 @@ index b6545349c..b4ab8a877 100644
 - "zerocopy",
 + "zerocopy 0.7.32",
  ]
-
+ 
  [[package]]
 @@ -165,7 +165,7 @@ checksum = "5fd55a5ba1179988837d24ab4c7cc8ed6efdeff578ede0416b4225a5fca35bd0"
  dependencies = [
@@ -18,7 +35,7 @@ index b6545349c..b4ab8a877 100644
 - "syn 2.0.48",
 + "syn 2.0.116",
  ]
-
+ 
  [[package]]
 @@ -176,7 +176,7 @@ checksum = "c980ee35e870bd1a4d2c8294d4c04d0499e67bca1e4b5cefcc693c2fa00caea9"
  dependencies = [
@@ -27,12 +44,12 @@ index b6545349c..b4ab8a877 100644
 - "syn 2.0.48",
 + "syn 2.0.116",
  ]
-
+ 
  [[package]]
 @@ -215,6 +215,12 @@ version = "0.21.7"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "9d297deb1925b89f2ccc13d7635fa0714f12c87adce1c75356b39ca9b7178567"
-
+ 
 +[[package]]
 +name = "base64"
 +version = "0.22.1"
@@ -45,7 +62,7 @@ index b6545349c..b4ab8a877 100644
 @@ -312,6 +318,12 @@ version = "1.0.0"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
-
+ 
 +[[package]]
 +name = "cfg_aliases"
 +version = "0.2.1"
@@ -62,12 +79,12 @@ index b6545349c..b4ab8a877 100644
 - "syn 2.0.48",
 + "syn 2.0.116",
  ]
-
+ 
  [[package]]
 @@ -588,15 +600,6 @@ version = "1.10.0"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "11157ac094ffbdde99aa67b23417ebdd801842852b500e395a45a9c0aac03e4a"
-
+ 
 -[[package]]
 -name = "encoding_rs"
 -version = "0.8.34"
@@ -87,7 +104,7 @@ index b6545349c..b4ab8a877 100644
 - "syn 2.0.48",
 + "syn 2.0.116",
  ]
-
+ 
  [[package]]
 @@ -770,7 +773,7 @@ checksum = "87750cf4b7a4c0625b1529e4c543c2182106e4dedc60a2a6455e00d212c489ac"
  dependencies = [
@@ -96,12 +113,12 @@ index b6545349c..b4ab8a877 100644
 - "syn 2.0.48",
 + "syn 2.0.116",
  ]
-
+ 
  [[package]]
 @@ -851,25 +854,6 @@ dependencies = [
   "regex-syntax 0.8.5",
  ]
-
+ 
 -[[package]]
 -name = "h2"
 -version = "0.3.26"
@@ -125,7 +142,7 @@ index b6545349c..b4ab8a877 100644
  name = "half"
  version = "2.4.1"
 @@ -910,87 +894,113 @@ checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
-
+ 
  [[package]]
  name = "http"
 -version = "0.2.12"
@@ -138,7 +155,7 @@ index b6545349c..b4ab8a877 100644
 - "fnv",
   "itoa",
  ]
-
+ 
  [[package]]
  name = "http-body"
 -version = "0.4.6"
@@ -151,7 +168,7 @@ index b6545349c..b4ab8a877 100644
   "http",
 - "pin-project-lite",
  ]
-
+ 
  [[package]]
 -name = "httparse"
 -version = "1.8.0"
@@ -167,7 +184,7 @@ index b6545349c..b4ab8a877 100644
 + "http-body",
 + "pin-project-lite",
 +]
-
+ 
  [[package]]
 -name = "httpdate"
 -version = "1.0.3"
@@ -176,7 +193,7 @@ index b6545349c..b4ab8a877 100644
  source = "registry+https://github.com/rust-lang/crates.io-index"
 -checksum = "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9"
 +checksum = "6dbf3de79e51f3d586ab4cb9d5c3e2c14aa28ed23d180cf89b4df0454a69cc87"
-
+ 
  [[package]]
  name = "hyper"
 -version = "0.14.30"
@@ -203,7 +220,7 @@ index b6545349c..b4ab8a877 100644
 - "tracing",
   "want",
  ]
-
+ 
  [[package]]
  name = "hyper-rustls"
 -version = "0.24.2"
@@ -223,7 +240,7 @@ index b6545349c..b4ab8a877 100644
 + "tower-service",
 + "webpki-roots 1.0.6",
  ]
-
+ 
  [[package]]
  name = "hyper-tls"
 -version = "0.5.0"
@@ -261,7 +278,7 @@ index b6545349c..b4ab8a877 100644
 + "tower-service",
 + "tracing",
  ]
-
+ 
  [[package]]
 @@ -1106,7 +1116,7 @@ checksum = "2a071f4f7efc9a9118dfb627a0a94ef247986e1ab8606a4c806ae2b3aa3b6978"
  dependencies = [
@@ -279,12 +296,12 @@ index b6545349c..b4ab8a877 100644
 - "syn 2.0.48",
 + "syn 2.0.116",
  ]
-
+ 
  [[package]]
 @@ -1560,6 +1570,26 @@ version = "2.3.1"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "e3148f5046208a5d56bcfc03053e3ca6334e51da8dfb19b6cdc8b306fae3283e"
-
+ 
 +[[package]]
 +name = "pin-project"
 +version = "1.1.10"
@@ -324,10 +341,10 @@ index b6545349c..b4ab8a877 100644
 +dependencies = [
 + "zerocopy 0.8.27",
  ]
-
+ 
  [[package]]
 @@ -1647,9 +1686,9 @@ dependencies = [
-
+ 
  [[package]]
  name = "proc-macro2"
 -version = "1.0.78"
@@ -341,7 +358,7 @@ index b6545349c..b4ab8a877 100644
 @@ -1663,6 +1702,58 @@ dependencies = [
   "memchr",
  ]
-
+ 
 +[[package]]
 +name = "quinn"
 +version = "0.11.6"
@@ -400,7 +417,7 @@ index b6545349c..b4ab8a877 100644
 @@ -1672,6 +1763,36 @@ dependencies = [
   "proc-macro2",
  ]
-
+ 
 +[[package]]
 +name = "rand"
 +version = "0.8.5"
@@ -435,7 +452,7 @@ index b6545349c..b4ab8a877 100644
  name = "rayon"
  version = "1.8.1"
 @@ -1747,21 +1868,21 @@ checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
-
+ 
  [[package]]
  name = "reqwest"
 -version = "0.11.27"
@@ -485,7 +502,7 @@ index b6545349c..b4ab8a877 100644
 + "webpki-roots 0.26.11",
   "winreg",
  ]
-
+ 
 @@ -1821,7 +1943,7 @@ dependencies = [
   "countme",
   "hashbrown",
@@ -494,11 +511,11 @@ index b6545349c..b4ab8a877 100644
 + "rustc-hash 1.1.0",
   "text-size",
  ]
-
+ 
 @@ -1837,6 +1959,12 @@ version = "1.1.0"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
-
+ 
 +[[package]]
 +name = "rustc-hash"
 +version = "2.1.1"
@@ -509,7 +526,7 @@ index b6545349c..b4ab8a877 100644
  name = "rustix"
  version = "0.38.31"
 @@ -1852,32 +1980,45 @@ dependencies = [
-
+ 
  [[package]]
  name = "rustls"
 -version = "0.21.12"
@@ -527,7 +544,7 @@ index b6545349c..b4ab8a877 100644
 + "subtle",
 + "zeroize",
  ]
-
+ 
  [[package]]
  name = "rustls-pemfile"
 -version = "1.0.4"
@@ -549,7 +566,7 @@ index b6545349c..b4ab8a877 100644
 + "web-time",
 + "zeroize",
  ]
-
+ 
  [[package]]
  name = "rustls-webpki"
 -version = "0.101.7"
@@ -562,11 +579,11 @@ index b6545349c..b4ab8a877 100644
 + "rustls-pki-types",
   "untrusted",
  ]
-
+ 
 @@ -1942,16 +2083,6 @@ version = "1.2.0"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
-
+ 
 -[[package]]
 -name = "sct"
 -version = "0.7.1"
@@ -587,7 +604,7 @@ index b6545349c..b4ab8a877 100644
 - "syn 2.0.48",
 + "syn 2.0.116",
  ]
-
+ 
  [[package]]
 @@ -2046,7 +2177,7 @@ checksum = "0b2e6b945e9d3df726b65d6ee24060aff8e3533d431f677a9695db04eff9dfdb"
  dependencies = [
@@ -596,12 +613,12 @@ index b6545349c..b4ab8a877 100644
 - "syn 2.0.48",
 + "syn 2.0.116",
  ]
-
+ 
  [[package]]
 @@ -2139,6 +2270,12 @@ version = "0.11.1"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
-
+ 
 +[[package]]
 +name = "subtle"
 +version = "2.6.1"
@@ -612,7 +629,7 @@ index b6545349c..b4ab8a877 100644
  name = "symbolic-common"
  version = "12.10.0"
 @@ -2175,9 +2312,9 @@ dependencies = [
-
+ 
  [[package]]
  name = "syn"
 -version = "2.0.48"
@@ -624,7 +641,7 @@ index b6545349c..b4ab8a877 100644
   "proc-macro2",
   "quote",
 @@ -2186,30 +2323,9 @@ dependencies = [
-
+ 
  [[package]]
  name = "sync_wrapper"
 -version = "0.1.2"
@@ -653,7 +670,7 @@ index b6545349c..b4ab8a877 100644
 - "libc",
 -]
 +checksum = "0bf256ce5efdfa370213c1dabab5935a12e49f2c58d15e9eac2870d3b4f27263"
-
+ 
  [[package]]
  name = "tap"
 @@ -2236,7 +2352,7 @@ dependencies = [
@@ -690,7 +707,7 @@ index b6545349c..b4ab8a877 100644
 +dependencies = [
 + "thiserror-impl 2.0.18",
  ]
-
+ 
  [[package]]
 @@ -2412,7 +2537,18 @@ checksum = "a953cb265bef375dae3de6663da4d3804eee9682ea80d8e2542529b73c531c81"
  dependencies = [
@@ -710,7 +727,7 @@ index b6545349c..b4ab8a877 100644
 + "quote",
 + "syn 2.0.116",
  ]
-
+ 
  [[package]]
 @@ -2507,7 +2643,7 @@ checksum = "5b8a1e28f2deaa14e508979454cb3a223b10b938b45af148bc0986de36f1923b"
  dependencies = [
@@ -719,10 +736,10 @@ index b6545349c..b4ab8a877 100644
 - "syn 2.0.48",
 + "syn 2.0.116",
  ]
-
+ 
  [[package]]
 @@ -2522,27 +2658,14 @@ dependencies = [
-
+ 
  [[package]]
  name = "tokio-rustls"
 -version = "0.24.1"
@@ -734,7 +751,7 @@ index b6545349c..b4ab8a877 100644
   "rustls",
   "tokio",
  ]
-
+ 
 -[[package]]
 -name = "tokio-util"
 -version = "0.7.11"
@@ -754,7 +771,7 @@ index b6545349c..b4ab8a877 100644
 @@ -2577,6 +2700,27 @@ dependencies = [
   "winnow",
  ]
-
+ 
 +[[package]]
 +name = "tower"
 +version = "0.4.13"
@@ -786,7 +803,7 @@ index b6545349c..b4ab8a877 100644
 - "syn 2.0.48",
 + "syn 2.0.116",
  ]
-
+ 
  [[package]]
 @@ -2787,7 +2931,7 @@ dependencies = [
   "log",
@@ -796,7 +813,7 @@ index b6545349c..b4ab8a877 100644
 + "syn 2.0.116",
   "wasm-bindgen-shared",
  ]
-
+ 
 @@ -2821,7 +2965,7 @@ checksum = "8ae87ea40c9f689fc23f209965b6fb8a99ad69aeeb0231408be24920604395de"
  dependencies = [
   "proc-macro2",
@@ -809,7 +826,7 @@ index b6545349c..b4ab8a877 100644
 @@ -2845,11 +2989,33 @@ dependencies = [
   "wasm-bindgen",
  ]
-
+ 
 +[[package]]
 +name = "web-time"
 +version = "1.1.0"
@@ -839,11 +856,11 @@ index b6545349c..b4ab8a877 100644
 +dependencies = [
 + "rustls-pki-types",
 +]
-
+ 
  [[package]]
  name = "winapi"
 @@ -3025,9 +3191,9 @@ dependencies = [
-
+ 
  [[package]]
  name = "winreg"
 -version = "0.50.0"
@@ -870,7 +887,7 @@ index b6545349c..b4ab8a877 100644
 +dependencies = [
 + "zerocopy-derive 0.8.27",
  ]
-
+ 
  [[package]]
 @@ -3050,5 +3225,22 @@ checksum = "9ce1b18ccd8e73a9321186f97e46f9f04b778851177567b1975109d26a08d2a6"
  dependencies = [
