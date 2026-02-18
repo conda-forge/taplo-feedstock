@@ -11,9 +11,11 @@ package:
 source:
   url: https://github.com/tamasfe/taplo/archive/refs/tags/release-taplo-cli-${{ version }}.tar.gz
   sha256: eaec8435bfb5ccd89f7b4dd09385b6be25c2ff00aa25417cb82c88a59d4ccde0
+  patches:
+    - bump-reqwest.patch
 
 build:
-  number: 1
+  number: 2
   script:
     file: build-taplo
 
