@@ -15,7 +15,22 @@ source:
 build:
   number: 2
   script:
-    file: build-taplo
+    env:
+      CARGO_PROFILE_RELEASE_STRIP: symbols
+      CARGO_PROFILE_RELEASE_LTO: fat
+    content:
+      - if: ppc64le
+        then:
+          # Rust 1.90 uses lld by default and has issue linking to conda libraries
+          # compiled with newer gcc
+          - export RUSTFLAGS="$RUSTFLAGS -C link-arg=-fuse-ld=bfd"
+      - if: unix
+        then:
+          - export OPENSSL_DIR="${PREFIX}"
+          - cargo auditable install --locked --features lsp,rustls-tls --no-track --bins --root ${{ PREFIX }} --path crates/taplo-cli
+        else:
+          - cargo auditable install --locked --features lsp,rustls-tls --no-track --bins --root %LIBRARY_PREFIX% --path crates\taplo-cli
+      - cargo-bundle-licenses --format yaml --output ./THIRDPARTY.yml
 
 requirements:
   build:
