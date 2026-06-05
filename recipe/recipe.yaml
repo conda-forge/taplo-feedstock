@@ -13,9 +13,24 @@ source:
   sha256: eaec8435bfb5ccd89f7b4dd09385b6be25c2ff00aa25417cb82c88a59d4ccde0
 
 build:
-  number: 1
+  number: 2
   script:
-    file: build-taplo
+    env:
+      CARGO_PROFILE_RELEASE_STRIP: symbols
+      CARGO_PROFILE_RELEASE_LTO: fat
+    content:
+      - if: ppc64le
+        then:
+          # Rust 1.90 uses lld by default and has issue linking to conda libraries
+          # compiled with newer gcc
+          - export RUSTFLAGS="$RUSTFLAGS -C link-arg=-fuse-ld=bfd"
+      - if: unix
+        then:
+          - export OPENSSL_DIR="${PREFIX}"
+          - cargo auditable install --locked --features lsp,rustls-tls --no-track --bins --root ${{ PREFIX }} --path crates/taplo-cli
+        else:
+          - cargo auditable install --locked --features lsp,rustls-tls --no-track --bins --root %LIBRARY_PREFIX% --path crates\taplo-cli
+      - cargo-bundle-licenses --format yaml --output ./THIRDPARTY.yml
 
 requirements:
   build:
@@ -23,11 +38,8 @@ requirements:
     - ${{ compiler("c") }}
     - ${{ stdlib("c") }}
     - cargo-bundle-licenses
+    - cargo-auditable
   host:
-    - if: not osx
-      then:
-        - clangdev
-        - llvmdev
     - if: unix
       then:
         - openssl
@@ -41,12 +53,16 @@ tests:
       - taplo --version
       - taplo --help
       - taplo --version | grep -iE "taplo ${{ version | replace(".", "\\.") }}"
+  - package_contents:
+      bin:
+        - taplo
+      strict: true
 
 about:
   license: MIT
   summary: A TOML toolkit written in Rust
   license_file:
-    - LICENSE.md
+    - LICENSE
     - THIRDPARTY.yml
   homepage: https://github.com/tamasfe/taplo
 
