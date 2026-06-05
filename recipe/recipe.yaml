@@ -24,10 +24,6 @@ requirements:
     - ${{ stdlib("c") }}
     - cargo-bundle-licenses
   host:
-    - if: not osx
-      then:
-        - clangdev
-        - llvmdev
     - if: unix
       then:
         - openssl
