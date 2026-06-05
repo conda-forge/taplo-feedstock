@@ -23,6 +23,7 @@ requirements:
     - ${{ compiler("c") }}
     - ${{ stdlib("c") }}
     - cargo-bundle-licenses
+    - cargo-auditable
   host:
     - if: unix
       then:

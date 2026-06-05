@@ -3,7 +3,7 @@
 set CARGO_PROFILE_RELEASE_STRIP=symbols
 
 :: build
-cargo install --locked ^
+cargo auditable install --locked ^
     --root "%PREFIX%" ^
     --path crates/taplo-cli ^
     --features lsp,rustls-tls ^

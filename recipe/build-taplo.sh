@@ -7,7 +7,7 @@ export OPENSSL_DIR="${PREFIX}"
 export CARGO_PROFILE_RELEASE_STRIP=symbols
 
 # build statically linked binary with Rust
-cargo install \
+cargo auditable install \
     --locked \
     --root "${PREFIX}" \
     --path crates/taplo-cli \
