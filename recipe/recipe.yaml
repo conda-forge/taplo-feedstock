@@ -37,6 +37,10 @@ tests:
       - taplo --version
       - taplo --help
       - taplo --version | grep -iE "taplo ${{ version | replace(".", "\\.") }}"
+  - package_contents:
+      bin:
+        - taplo
+      strict: true
 
 about:
   license: MIT
